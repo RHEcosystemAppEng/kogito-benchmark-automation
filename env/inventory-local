@@ -1,0 +1,12 @@
+[tester]
+localhost ansible_connection=local
+
+[tester:vars]
+install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install
+permissions_owner=uegozi
+permissions_group=uegozi
+
+[app]
+localhost ansible_connection=local
+[app:vars]
+install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install

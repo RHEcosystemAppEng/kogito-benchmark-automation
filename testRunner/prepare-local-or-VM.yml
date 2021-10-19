@@ -1,0 +1,31 @@
+---
+- name: install and/or build and run application and infra
+  hosts: app
+  tasks:
+
+# user Infra values for docker containers - currently ignored and mongo/postgres tested hardcoded
+
+    - name: Run docker-compose
+      become: yes
+      shell:
+        cmd: "/usr/local/bin/docker-compose -f mongo-docker-compose.yml up -d --remove-orphans"
+        #cmd: "/usr/local/bin/docker-compose -f pg-docker-compose.yml up -d --remove-orphans"
+        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker"
+
+    - name: trying to stop business process app - might not be running
+      ansible.builtin.shell: ./stopTheApp.sh
+      args:
+        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
+
+    - name: build and run business process app
+      ansible.builtin.shell: ./runAppInTheBackground.sh
+      args:
+        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
+      register: app_start_result
+    - name: "build and run business process app debug output"
+      debug:
+        var: app_start_result
+
+# run Lokeshs validations on env
+
+

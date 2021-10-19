@@ -1,0 +1,8 @@
+[tester]
+appeng-vm02.cloud.lab.eng.bos.redhat.com
+
+[tester:vars]
+install_dir=/opt/fsi-kogito/test
+permissions_owner=uegozi
+permissions_group=fsi-team
+

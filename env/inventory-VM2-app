@@ -1,0 +1,7 @@
+[app]
+appeng-vm02.cloud.lab.eng.bos.redhat.com
+
+[app:vars]
+install_dir=/opt/fsi-kogito
+permissions_owner=uegozi
+permissions_group=fsi-team
