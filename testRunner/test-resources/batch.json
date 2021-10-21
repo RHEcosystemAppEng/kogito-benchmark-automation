@@ -2,5 +2,10 @@
   "Infra": {"Mongo":"yes", "PostgresQL":"yes", "DataIndex":"no", "Kafka":"no"},
   "Tester": "LOCAL",
   "App": "LOCAL",
-  "Process": {"schema":"http", "url":"localhost", "port":"8080", "app":"simpleHT"}
+  "Process": {"schema":"http", "url":"localhost", "port":8080, "app":"simpleHT"},
+  "Warmup": {"enabled":"yes", "users":10, "duration":1},
+  "Tests": [
+    {"replicas":1, "users":1, "requests":2},
+    {"replicas":1, "users":1, "requests":4}
+  ]
 }

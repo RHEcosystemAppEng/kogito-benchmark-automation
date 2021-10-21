@@ -2,8 +2,8 @@
   hosts: tester
   tasks:
 
-    - name: run hosts test script sending all parameters needed for one test
-      ansible.builtin.shell: ./runTest.sh "{{ testreq }}"
+    - name: run test script on host with argument
+      ansible.builtin.shell: ./runTest.sh "{{ testidx }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-clients/jmeter-client"
 

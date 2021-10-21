@@ -1,2 +1,3 @@
 kogito-venv/
 *.html
+/test-run/

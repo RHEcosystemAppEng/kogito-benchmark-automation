@@ -1,7 +1,6 @@
 #!/bin/sh
 
 BATCH_FILE=test-resources/batch.json
-TESTS_FILE=test-resources/tests.json
 
 INFRA=$(jq '.Infra' $BATCH_FILE)
 TESTER=$(jq '.Tester' $BATCH_FILE)
@@ -11,12 +10,11 @@ echo "defined INFRA: "$INFRA
 echo "TESTER env: "$TESTER
 echo "APP env: "$APP
 
-#get environment configuration where test is to be run
+#set environment configuration where test is to be run
 INVENTORY_TESTER=""
 CMD_LINE_PARAMS_TESTER=" -v "
 INVENTORY_APP=""
 CMD_LINE_PARAMS_APP=" -v "
-
 if [[ $TESTER = '"LOCAL"' ]] && [[ $APP = '"LOCAL"' ]]
 then
   echo "running locally"
@@ -44,20 +42,37 @@ echo "tester command line parameters: "$CMD_LINE_PARAMS_TESTER
 echo "app inventory: "$INVENTORY_APP
 echo "app command line parameters: "$CMD_LINE_PARAMS_APP
 
-#copy all data connected to test (except the data specific per test run) to JMeter of tester host
-ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.copy -a 'src='$BATCH_FILE' dest="{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/test-run"'
+#pre processing
+#setup remote JMeter for new test run - remove any previously created test-run folder
+ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.file -a 'path="{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/test-run" state=absent'
+#copy all data connected to test (except the data specific per each test run) to JMeter of tester host
+ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.copy -a 'src='$BATCH_FILE' dest="{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/test-run/"'
 
-NO_OF_TESTS=$(jq '. | length' $TESTS_FILE)
+TEST_COUNTER=0
+NO_OF_TESTS=$(jq '.Tests | length' $BATCH_FILE)
+WITH_WARMUP=$(jq -r '.Warmup .enabled' $BATCH_FILE)
 #run tests - checks the env and kicks off the test
-while [ $NO_OF_TESTS -gt 0 ]
+while [ $TEST_COUNTER -lt $NO_OF_TESTS ]
 do
-  NO_OF_TESTS=$((NO_OF_TESTS-1))
   #install/deploy/run/validate env
-  ansible-playbook prepare-local-or-VM.yml -i $INVENTORY_APP $CMD_LINE_PARAMS_APP -e "$INFRA"
-  #run test
-  TEST_RUN=$(jq '.['$NO_OF_TESTS']' $TESTS_FILE)
-  ansible-playbook runtest-local-or-VM.yml -i $INVENTORY_TESTER $CMD_LINE_PARAMS_TESTER -e 'testreq='"$TEST_RUN"
-  #do post processing	
-  #kickoff Danieles reporting here???
+  #ansible-playbook prepare-local-or-VM.yml -i $INVENTORY_APP $CMD_LINE_PARAMS_APP -e "$INFRA"
+  #run warmup
+  if [ $WITH_WARMUP = "yes" ]
+  then
+    ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.shell -a "./runTestWarmup.sh "$TEST_COUNTER"; chdir=\"{{install_dir}}/kogito-benchmark/test-clients/jmeter-client\""
+  fi
+  #kickoff metrics collection - call Lokeshs REST API here - send interval for polling metrics on application, env (Vm or OCP) to use
+  #TODO
+  #run test - could also be an ad hoc like the warmup call
+  ansible-playbook runtest-local-or-VM.yml -i $INVENTORY_TESTER $CMD_LINE_PARAMS_TESTER -e "testidx=$TEST_COUNTER"
+  #request accumulated metrics - call Lokeshs REST API here
+  #TODO
+  TEST_COUNTER=$((TEST_COUNTER+1))
 done
 
+#post processing
+#copy the remote test_run folder to the reportGenerator after removing any existing
+ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.file -a 'path="../reportGenerator/test-run" state=absent'
+ansible -i "$INVENTORY_TESTER" tester -m ansible.builtin.copy -a 'src="{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/test-run" dest=../reportGenerator'
+#kickoff Danieles reporting here???
+#TODO
