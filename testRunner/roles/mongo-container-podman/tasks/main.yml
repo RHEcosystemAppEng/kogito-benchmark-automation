@@ -1,0 +1,26 @@
+---
+- name: remove mongo container if present
+  containers.podman.podman_container:
+    name: kogito-mongodb
+    image: quay.io/dmartino/mongo:4.4.9
+    state: absent
+    ports:
+      - "27017:27017"
+  register: mongo_out
+  when: test_defs.Infra.Mongo == "no"
+
+- name: Start a mongo container if not running already
+  containers.podman.podman_container:
+    name: kogito-mongodb
+    image: quay.io/dmartino/mongo:4.4.9
+    state: started
+    ports:
+      - "27017:27017"
+  register: mongo_out
+  when: test_defs.Infra.Mongo == "yes"
+
+#    - name: mongo debug
+#      ansible.builtin.debug:
+#        msg:
+#          - "{{ mongo_out }}"
+

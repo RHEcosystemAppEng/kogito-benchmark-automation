@@ -1,13 +1,8 @@
 ---
-# -v - verbose output
-# -K for password for become user - needed on my localhost but not for VMs
-# run with: ansible-playbook provision-local-or-VM.yml -i inventory-local -v -K
-# OR ansible-playbook provision-local-or-VM.yml -i inventory-VM1-tester -i inventory-VM2-app
-# OR ansible-playbook provision-local-or-VM.yml -i inventory-VM2-tester -i inventory-VM2-app
-# depending on environment we want to build
-
-- name: setup JMeter on tester
+- name: setup tester env
   hosts: tester
+  vars:
+    install_ansible: {{ install_ansible }}
   tasks:
     - name: create JMeter install directory
       ansible.builtin.file:

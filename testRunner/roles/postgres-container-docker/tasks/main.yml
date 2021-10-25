@@ -1,0 +1,68 @@
+---
+- name: Create the postgres network
+  become: yes
+  community.docker.docker_network:
+    name: postgres-compose-network
+    driver: bridge
+
+- name: remove postgresql container if present
+  become: yes
+  community.docker.docker_container:
+    name: postgres-container
+    image: quay.io/dmartino/postgres:9.6
+    state: absent
+    ports:
+      - "5432:5432"
+  register: postgresql_out
+  when: test_defs.Infra.PostgresQL == "no"
+
+- name: remove pgadmin container if present
+  become: yes
+  community.docker.docker_container:
+    name: pgadmin-container
+    image: quay.io/dmartino/pgadmin4:5.0
+    state: absent
+    ports:
+      - "8055:80"
+  register: postgresql_out_pg
+  when: test_defs.Infra.PostgresQL == "no"
+
+- name: Start a postgresql container if not running already
+  become: yes
+  community.docker.docker_container:
+    name: postgres-container
+    image: quay.io/dmartino/postgres:9.6
+    state: started
+    env:
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./test-infra/sql:/docker-entrypoint-initdb.d/
+    networks:
+      - name: postgres-compose-network
+  register: postgresql_out
+  when: test_defs.Infra.PostgresQL == "yes"
+
+- name: Start a pgadmin container if not running already
+  become: yes
+  community.docker.docker_container:
+    name: pgadmin-container
+    image: quay.io/dmartino/pgadmin4:5.0
+    state: started
+    env:
+      PGADMIN_DEFAULT_EMAIL: user@user.org
+      PGADMIN_DEFAULT_PASSWORD: pass
+    ports:
+      - "8055:80"
+    networks:
+      - name: postgres-compose-network
+  #          depends_on:  there is no depends on in ansible - containers will be started in order, but one doesn't wait for a specific state of the other
+  #            - postgres-compose
+  register: postgresql_out_pg
+  when: test_defs.Infra.PostgresQL == "yes"
+
+#    - name: postgresql debug
+#      ansible.builtin.debug:
+#        msg:
+#          - "{{ postgresql_out }}"

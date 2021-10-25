@@ -1,30 +1,54 @@
 ---
 - name: install and/or build and run application and infra
   hosts: app
+  vars:
+    test_defs: "{{ lookup('file',''+testdefs+'') | from_json }}"
+    ansible_python_interpreter: /usr/bin/python3
   tasks:
 
-# user Infra values for docker containers - currently ignored and mongo/postgres tested hardcoded
+####################### MONGO INFRA
 
-    - name: Run docker-compose
-      become: yes
-      shell:
-        cmd: "/usr/local/bin/docker-compose -f mongo-docker-compose.yml up -d --remove-orphans"
-        #cmd: "/usr/local/bin/docker-compose -f pg-docker-compose.yml up -d --remove-orphans"
-        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker"
+    - name: is mongo requested for persistence?
+      ansible.builtin.debug:
+        msg:
+          - "Mongo Infra requested:{{ test_defs.Infra.Mongo }}"
 
+    - name: Set a app_profile variable
+      ansible.builtin.set_fact:
+        app_profile: mongo
+      when: test_defs.Infra.Mongo == "yes"
+
+    - name: Include the mongo containers setup role
+      include_role:
+        name: mongo-container-{{ test_defs.Infrasetup }}
+
+####################### POSTGRES INFRA
+
+    - name: is postgres requested for persistence?
+      ansible.builtin.debug:
+        msg:
+          - "PostgresQL Infra requested:{{ test_defs.Infra.PostgresQL }}"
+
+    - name: Set a app_profile variable
+      ansible.builtin.set_fact:
+        app_profile: postgres
+      when: test_defs.Infra.PostgresQL == "yes"
+
+    - name: Include the mongo containers setup role
+      include_role:
+        name: postgres-container-{{ test_defs.Infrasetup }}
+
+######################### APPLICATION
+    -
     - name: trying to stop business process app - might not be running
       ansible.builtin.shell: ./stopTheApp.sh
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
 
     - name: build and run business process app
-      ansible.builtin.shell: ./runAppInTheBackground.sh
+      ansible.builtin.shell: ./runAppInTheBackground.sh "{{ app_profile }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
-      register: app_start_result
-    - name: "build and run business process app debug output"
-      debug:
-        var: app_start_result
 
 # run Lokeshs validations on env
 

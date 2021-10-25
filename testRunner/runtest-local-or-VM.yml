@@ -3,7 +3,7 @@
   tasks:
 
     - name: run test script on host with argument
-      ansible.builtin.shell: ./runTest.sh "{{ testidx }}"
+      ansible.builtin.shell: ./runTests.sh "{{ testclient }}" "{{ testidx }}"
       args:
-        chdir: "{{install_dir}}/kogito-benchmark/test-clients/jmeter-client"
+        chdir: "{{install_dir}}/kogito-benchmark/test"
 
