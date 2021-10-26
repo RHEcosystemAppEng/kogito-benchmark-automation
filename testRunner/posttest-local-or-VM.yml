@@ -1,0 +1,12 @@
+- name: run post test
+  hosts: "{{ tester }}"
+  tasks:
+
+    - name: make sure report folder is empty
+      ansible.builtin.file:
+        path: "../reportGenerator/test-run"
+        state: absent
+      delegate_to: 127.0.0.1
+
+#    - name: fetch remote folder
+#      ansible.builtin.shell: "scp -r {{permissions_owner}}@appeng-vm01.cloud.lab.eng.bos.redhat.com:{{install_dir}}/kogito-benchmark/test/test-run ../reportGenerator "

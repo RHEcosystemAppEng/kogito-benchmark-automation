@@ -1,6 +1,6 @@
 ---
 - name: install and/or build and run application and infra
-  hosts: app
+  hosts: "{{ app }}"
   vars:
     test_defs: "{{ lookup('file',''+testdefs+'') | from_json }}"
     ansible_python_interpreter: /usr/bin/python3
@@ -34,7 +34,7 @@
         app_profile: postgres
       when: test_defs.Infra.PostgresQL == "yes"
 
-    - name: Include the mongo containers setup role
+    - name: Include the postgres containers setup role
       include_role:
         name: postgres-container-{{ test_defs.Infrasetup }}
 

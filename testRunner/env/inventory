@@ -1,0 +1,23 @@
+[LOCAL]
+localhost ansible_connection=local
+
+[LOCAL:vars]
+install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install
+permissions_owner=uegozi
+permissions_group=uegozi
+
+[VM1]
+appeng-vm01.cloud.lab.eng.bos.redhat.com
+
+[VM1:vars]
+install_dir=/opt/fsi-kogito
+permissions_owner=uegozi
+permissions_group=fsi-team
+
+[VM2]
+appeng-vm02.cloud.lab.eng.bos.redhat.com
+
+[VM2:vars]
+install_dir=/opt/fsi-kogito
+permissions_owner=uegozi
+permissions_group=fsi-team

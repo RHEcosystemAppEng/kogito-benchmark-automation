@@ -12,7 +12,7 @@
     ports:
       - "5432:5432"
   register: postgresql_out
-  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.Infra.PostgresQL == "no"
 
 - name: remove pgadmin container if present
   containers.podman.podman_container:
@@ -22,7 +22,7 @@
     ports:
       - "8055:80"
   register: postgresql_out_pgadmin
-  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.Infra.PostgresQL == "no"
 
 #    - name: remove pgadmin container if present
 #      containers.podman.podman_container:

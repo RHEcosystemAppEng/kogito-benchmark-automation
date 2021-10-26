@@ -14,7 +14,7 @@
     ports:
       - "5432:5432"
   register: postgresql_out
-  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.Infra.PostgresQL == "no"
 
 - name: remove pgadmin container if present
   become: yes
@@ -25,7 +25,7 @@
     ports:
       - "8055:80"
   register: postgresql_out_pg
-  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.Infra.PostgresQL == "no"
 
 - name: Start a postgresql container if not running already
   become: yes
@@ -37,8 +37,8 @@
       POSTGRES_PASSWORD: pass
     ports:
       - "5432:5432"
-    volumes:
-      - ./test-infra/sql:/docker-entrypoint-initdb.d/
+#    volumes:
+#      - ./test-infra/sql:/docker-entrypoint-initdb.d/
     networks:
       - name: postgres-compose-network
   register: postgresql_out
@@ -57,8 +57,6 @@
       - "8055:80"
     networks:
       - name: postgres-compose-network
-  #          depends_on:  there is no depends on in ansible - containers will be started in order, but one doesn't wait for a specific state of the other
-  #            - postgres-compose
   register: postgresql_out_pg
   when: test_defs.Infra.PostgresQL == "yes"
 

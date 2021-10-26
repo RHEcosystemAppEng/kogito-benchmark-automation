@@ -1,8 +1,8 @@
 - name: run test
-  hosts: tester
+  hosts: "{{ tester }}"
   tasks:
 
-    - name: run test script on host with argument
+    - name: run test script on host with arguments
       ansible.builtin.shell: ./runTests.sh "{{ testclient }}" "{{ testidx }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test"

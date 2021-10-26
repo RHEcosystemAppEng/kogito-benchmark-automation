@@ -8,7 +8,7 @@
     ports:
       - "27017:27017"
   register: mongo_out
-  when: test_defs.Infra.Mongo == "no"
+#  when: test_defs.Infra.Mongo == "no"
 
 - name: Start a mongo container if not running already
   become: yes
