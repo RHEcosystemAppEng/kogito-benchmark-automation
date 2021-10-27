@@ -14,6 +14,7 @@ sudo yum install ansible
 # install extra ansible modules
 ansible-galaxy collection install community.docker
 ansible-galaxy collection install containers.podman
+ansible-galaxy collection install community.general
 ```
 ### Install JQ on controller and tester machine
 JQ is used in most of the runXXX.sh scripts to parse the batch.json configuration file 

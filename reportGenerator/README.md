@@ -26,13 +26,13 @@ python3 -m jupyter nbconvert --execute benchmarkReport.ipynb --to html --no-inpu
 
 Use `open benchmarkReport.html` to show the generated report on the default browser.
 
-# Developoing with VS Code
+# Developing with VS Code
 Requirements:
 * `Jupyter` extension
 * `Python` extension
 
 Steps:
-* `View>Command Palette` (SHIFT-CMD-P) run `Python: Select Interpreter`
+* `View > Command Palette` (SHIFT-CMD-P) run `Python: Select Interpreter`
 * Add the new interpreter located at `./kogito-venv/bin/python3.9` (use the absolute path)
 * Open the Jupyter Notebook [benchmarkReport.ipynb](benchmarkReport.ipynb)
 * Select the Python Kernel from the status bar, using the newly added interpreter

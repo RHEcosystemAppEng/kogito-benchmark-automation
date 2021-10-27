@@ -35,8 +35,7 @@ do
 done
 
 # post processing
-ansible-playbook posttest-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_TESTER -e "tester=$TESTER"
-# kickoff Danieles reporting here???
+ansible-playbook posttest-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_TESTER -e "controller=LOCAL tester=$TESTER"
 #TODO
 
 

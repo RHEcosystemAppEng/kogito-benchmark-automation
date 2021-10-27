@@ -1,4 +1,5 @@
-- name: run post test
+---
+- name: run post test - tester machine operations
   hosts: "{{ tester }}"
   tasks:
 
@@ -8,5 +9,48 @@
         state: absent
       delegate_to: 127.0.0.1
 
-#    - name: fetch remote folder
-#      ansible.builtin.shell: "scp -r {{permissions_owner}}@appeng-vm01.cloud.lab.eng.bos.redhat.com:{{install_dir}}/kogito-benchmark/test/test-run ../reportGenerator "
+    - name: fetch remote results folder into reportGenerator
+      block:
+        - name: Compress directory "{{install_dir}}/kogito-benchmark/test/test-run"
+          community.general.archive:
+            path: "{{install_dir}}/kogito-benchmark/test/test-run"
+            dest: "{{install_dir}}/kogito-benchmark/test/test-run.tgz"
+
+        - name: fetch remote folder {{install_dir}}/kogito-benchmark/test/test-run.tgz
+          ansible.builtin.fetch:
+            src: "{{install_dir}}/kogito-benchmark/test/test-run.tgz"
+            dest: ../reportGenerator/
+            flat: yes
+
+        - name: unarchive results locally
+          ansible.builtin.unarchive:
+            src: ../reportGenerator/test-run.tgz
+            dest: ../reportGenerator
+          delegate_to: 127.0.0.1
+
+        - name: remove local compressed file
+          ansible.builtin.file:
+            path: ../reportGenerator/test-run.tgz
+            state: absent
+          delegate_to: 127.0.0.1
+
+        - name: remove remote compressed file
+          ansible.builtin.file:
+            path: "{{install_dir}}/kogito-benchmark/test/test-run.tgz"
+            state: absent
+
+- name: run post test - controller machine operations
+  hosts: "{{ controller }}"
+    tasks:
+
+      - name: run report generator on results
+        block:
+          - name: setup virtual python env
+            ansible.builtin.shell: |
+              python3 -m venv kogito-venv
+              source kogito-venv/bin/activate
+              pip install --upgrade pip
+              pip3 install -r requirements.txt
+              python3 -m jupyter nbconvert --execute benchmarkReport.ipynb --to html --no-input
+            args:
+              chdir: ../reportGenerator
