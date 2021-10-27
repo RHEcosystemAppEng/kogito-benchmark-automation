@@ -41,16 +41,16 @@
 
 - name: run post test - controller machine operations
   hosts: "{{ controller }}"
-    tasks:
+  tasks:
 
-      - name: run report generator on results
-        block:
-          - name: setup virtual python env
-            ansible.builtin.shell: |
-              python3 -m venv kogito-venv
-              source kogito-venv/bin/activate
-              pip install --upgrade pip
-              pip3 install -r requirements.txt
-              python3 -m jupyter nbconvert --execute benchmarkReport.ipynb --to html --no-input
-            args:
-              chdir: ../reportGenerator
+    - name: run report generator on results
+      block:
+        - name: setup virtual python env
+          ansible.builtin.shell: |
+            python3 -m venv kogito-venv
+            source kogito-venv/bin/activate
+            pip install --upgrade pip
+            pip3 install -r requirements.txt
+            python3 -m jupyter nbconvert --execute benchmarkReport.ipynb --to html --no-input
+          args:
+            chdir: ../reportGenerator
