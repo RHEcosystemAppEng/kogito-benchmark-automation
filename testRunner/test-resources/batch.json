@@ -10,16 +10,17 @@
   "Warmup": {
     "enabled":"yes",
     "type":"duration",
-    "timeOrCount":1,
+    "timeOrCount":60,
     "replicas":1,
     "users":10
   },
   "Tests": {
     "type":"duration",
-    "timeOrCount":2,
+    "timeOrCount":120,
     "runs": [
       {"replicas":1, "users":1},
-      {"replicas":1, "users":4}
+      {"replicas":1, "users":4},
+      {"replicas":1, "users":8}
     ]
   }
 }

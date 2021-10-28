@@ -40,27 +40,35 @@
 
 ######################### APPLICATION
 
-    - name: remove any previous existing benchmark
-      ansible.builtin.file:
-        path: "{{install_dir}}/kogito-benchmark"
-        state: absent
-
-    - name: checkout the app version "{{ test_defs.InfraSetup.appVersion }}"
-      ansible.builtin.git:
-        repo: https://github.com/RHEcosystemAppEng/kogito-benchmark.git
-        dest: "{{install_dir}}/kogito-benchmark"
-        #        single_branch: yes
-        version: "{{ test_defs.InfraSetup.appVersion }}"
-
-    - name: set JMeter Home directory to "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
-      ansible.builtin.copy:
-        dest: "{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/jmeterHome.txt"
-        content: "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
-
     - name: trying to stop business process app - might not be running
       ansible.builtin.shell: ./stopTheApp.sh
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
+
+    - name: setup benchmark project - once per batch run
+      block:
+        - name: remove any previous existing benchmark
+          ansible.builtin.file:
+            path: "{{install_dir}}/kogito-benchmark"
+            state: absent
+
+        - name: checkout the app version "{{ test_defs.InfraSetup.appVersion }}"
+          ansible.builtin.git:
+            repo: https://github.com/RHEcosystemAppEng/kogito-benchmark.git
+            dest: "{{install_dir}}/kogito-benchmark"
+            #        single_branch: yes
+            version: "{{ test_defs.InfraSetup.appVersion }}"
+
+        - name: copy current test configuration to {{install_dir}}/kogito-benchmark/test/test-run
+          ansible.builtin.copy:
+            src: "test-resources/batch.json"
+            dest: "{{install_dir}}/kogito-benchmark/test/test-run/"
+
+        - name: set JMeter Home directory to "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
+          ansible.builtin.copy:
+            dest: "{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/jmeterHome.txt"
+            content: "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
+      when: testidx == '0'
 
     - name: build and run business process app
       ansible.builtin.shell: ./runAppInTheBackground.sh "{{ app_profile }}"

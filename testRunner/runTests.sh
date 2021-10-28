@@ -16,21 +16,15 @@ then
 fi
 echo "app command line parameters: "$CMD_LINE_PARAMS_APP
 
-# pre processing
-# setup remote benchmark host for test run - remove any previously created test-run folder
-ansible $TESTER -i "env/inventory" -m ansible.builtin.file -a 'path="{{install_dir}}/kogito-benchmark/test/test-run" state=absent'
-# copy new test data to benchmark host
-ansible $TESTER -i "env/inventory" -m ansible.builtin.copy -a 'src='$BATCH_FILE' dest="{{install_dir}}/kogito-benchmark/test/test-run/"'
-
 TEST_COUNTER=0
-NO_OF_TESTS=$(jq '.Tests | length' $BATCH_FILE)
+NO_OF_TESTS=$(jq '.Tests.runs | length' $BATCH_FILE)
 while [ $TEST_COUNTER -lt $NO_OF_TESTS ]
 do
   # install/deploy/run
-  ansible-playbook prepare-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_APP -e "app=$APP testdefs=$BATCH_FILE"
+  ansible-playbook prepare-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_APP -e "app=$APP testdefs=$BATCH_FILE testidx=$TEST_COUNTER"
 
   # run test - could also be an ad hoc
-  ansible-playbook runtest-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_TESTER -e "tester=$TESTER testclient=JMETER testidx=$TEST_COUNTER"
+  ansible-playbook runtest-local-or-VM.yml -i "env/inventory" $CMD_LINE_PARAMS_TESTER -vvv -e "tester=$TESTER testclient=JMETER testidx=$TEST_COUNTER"
   TEST_COUNTER=$((TEST_COUNTER+1))
 done
 
