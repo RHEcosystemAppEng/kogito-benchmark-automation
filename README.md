@@ -49,6 +49,9 @@ pip -V
 pip install docker
 ```
 
+### Add ssh-key for user
+If ansible is run from VM1 to access VM1/VM2, each user who wants to run the tests from VM1 
+needs to add a ssh-key created under his/her account on VM1 (`~/.ssh`) to both VM1 and VM2 (`~/.ssh/authorized_keys`)  
 
 ## Running tests
 - update the inventory file `testRunner/env/inventory`
