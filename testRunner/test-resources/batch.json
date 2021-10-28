@@ -1,11 +1,25 @@
 {
-  "Tester": "LOCAL",
-  "App": "LOCAL",
-  "Infrasetup": "podman",
-  "Infra": {"Mongo":"yes", "PostgresQL":"no", "DataIndex":"no", "Kafka":"no"},
+  "InfraSetup": {
+    "appVersion":"CoreFix-mem-idx-2.0.0-snap",
+    "tester": {"name":"LOCAL","hostname": "localhost"},
+    "app": {"name":"LOCAL","hostname": "localhost"},
+    "container":"podman"
+  },
+  "AppInfra": {"Mongo":"yes", "PostgresQL":"no", "DataIndex":"no", "Kafka":"no"},
   "Process": {"schema":"http", "url":"localhost", "port":8080, "app":"simpleHT"},
-  "Warmup": {"enabled":"yes", "users":10, "duration":1},
-  "Tests": [
-    {"replicas":1, "users":1, "requests":2}
-  ]
+  "Warmup": {
+    "enabled":"yes",
+    "type":"duration",
+    "timeOrCount":1,
+    "replicas":1,
+    "users":10
+  },
+  "Tests": {
+    "type":"duration",
+    "timeOrCount":2,
+    "runs": [
+      {"replicas":1, "users":1},
+      {"replicas":1, "users":4}
+    ]
+  }
 }

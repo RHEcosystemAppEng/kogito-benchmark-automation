@@ -2,8 +2,8 @@
 
 BATCH_FILE=../test-resources/batch.json
 
-TESTER=$(jq -r '.Tester' $BATCH_FILE)
-APP=$(jq -r '.App' $BATCH_FILE)
+TESTER=$(jq -r '.InfraSetup.tester.name' $BATCH_FILE)
+APP=$(jq -r '.InfraSetup.app.name' $BATCH_FILE)
 
 echo "TESTER env: "$TESTER
 echo "APP env: "$APP

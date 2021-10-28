@@ -14,7 +14,7 @@
     ports:
       - "5432:5432"
   register: postgresql_out
-#  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.AppInfra.PostgresQL == "no"
 
 - name: remove pgadmin container if present
   become: yes
@@ -25,7 +25,7 @@
     ports:
       - "8055:80"
   register: postgresql_out_pg
-#  when: test_defs.Infra.PostgresQL == "no"
+#  when: test_defs.AppInfra.PostgresQL == "no"
 
 - name: Start a postgresql container if not running already
   become: yes
@@ -42,7 +42,7 @@
     networks:
       - name: postgres-compose-network
   register: postgresql_out
-  when: test_defs.Infra.PostgresQL == "yes"
+  when: test_defs.AppInfra.PostgresQL == "yes"
 
 - name: Start a pgadmin container if not running already
   become: yes
@@ -58,7 +58,7 @@
     networks:
       - name: postgres-compose-network
   register: postgresql_out_pg
-  when: test_defs.Infra.PostgresQL == "yes"
+  when: test_defs.AppInfra.PostgresQL == "yes"
 
 #    - name: postgresql debug
 #      ansible.builtin.debug:

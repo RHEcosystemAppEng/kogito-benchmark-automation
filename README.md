@@ -56,12 +56,21 @@ pip install docker
   otherwise run script `envSetup/runSetup.sh` (not final)
 - configure tests
   - edit file `testRunner/test-resources/batch.json`   
-    - `Tester`: LOCAL|VM1|VM2
-    - `App`: LOCAL|VM2|OCP
-    - `Infrasetup`: podman|docker
-    - `Infra`: lists all supported infra structure components (TODO: currently just Mongo and Postgres) - to use, set value to yes, otherwise to no
-    - `Process`: how to access the endpoint that is to be tested
-    - `Warmup`: if case a warmup run is to be done before each test run
-    - `Tests`: list of tests to be run; replicas field just relevant for OCP, should contain either `requests` or `duration`
+    - `InfraSetup.appVersion`: benchmark project branch under test
+    - `InfraSetup.tester`: `name`: LOCAL|VM1|VM2 `hostname`: localhost|<host name>
+    - `InfraSetup.app`: `name`: LOCAL|VM2 `hostname`: localhost|<host name>`
+    - `InfraSetup.container`: podman|docker
+    - `AppInfra`: lists all supported infra structure components (TODO: currently just Mongo and Postgres) - to use, set value to yes, otherwise to no
+    - `Process`: endpoint configuration under test
+    - `Warmup.enabled`: if case a warmup run is done before the test runs
+    - `Warmup.type`: see `Tests.type`
+    - `Warmup.timeOrCount`: see `Tests.timeOrCount`
+    - `Warmup.replicas`: see `Tests.replicas`
+    - `Warmup.users`: see `Tests.users`
+    - `Tests.type`: requests|duration
+    - `Tests.timeOrCount`: number of requests|duration of test 
+    - `Tests.runs`: list of tests to be run; 
+    - `Tests.replicas`: number of application replicas when running on OCP
+    - `Tests.users`: number of concurrent users
 - run script `testRunner/runTests.sh`
 
