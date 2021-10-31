@@ -1,0 +1,92 @@
+---
+- name: setup tester env
+  hosts: "{{ tester }}"
+  tasks:
+    - name: JMeter installation
+      block:
+        - name: create JMeter install directory
+          ansible.builtin.file:
+            path: "{{jmeter_install_dir}}"
+            state: directory
+            mode: u=rwx,g=rwx
+
+        - name: Get stats on JMeter installation
+          ansible.builtin.stat:
+            path: "{{jmeter_install_dir}}/{{jmeter_distribution}}"
+          register: jmeter_unzipped
+        - name: Print jmeter_unzipped
+          ansible.builtin.debug:
+            msg: "Path {{jmeter_install_dir}}/{{jmeter_distribution}} exists and is a directory"
+          when: jmeter_unzipped.stat.isdir is defined and jmeter_unzipped.stat.isdir
+        - name: unarchive JMeter
+          ansible.builtin.unarchive:
+            src: "{{jmeter_distribution_url}}"
+            dest: "{{jmeter_install_dir}}"
+            remote_src: yes
+            mode: u=rwx,g=rwx
+          when: jmeter_unzipped.stat.isdir is not defined
+
+        - name: unarchive additional used plugins to JMeter installation from benchmark automation
+          ansible.builtin.unarchive:
+            src: "envSetup/install-resources/{{jmeter_additional_files_archive}}"
+            dest: "{{jmeter_install_dir}}"
+            mode: u=rwx,g=rwx
+        - name: copy additional used plugins into JMeter unzipped location "{{jmeter_install_dir}}/{{jmeter_distribution}}" (copies only first level because of / at end of src folder - if no / then copies also the original folder name itself which is also not wanted)
+          ansible.builtin.copy:
+            src: "{{jmeter_install_dir}}/{{jmeter_additional_files_folder}}/"
+            dest: "{{jmeter_install_dir}}/{{jmeter_distribution}}"
+            remote_src: yes
+            mode: u=rwx,g=rwx
+        - name: copy additional used plugins into JMeter unzipped location "{{jmeter_install_dir}}/{{jmeter_distribution}}" (because see above, could have made shell cmd copy instead of these two tasks)
+          ansible.builtin.copy:
+            src: "{{jmeter_install_dir}}/{{jmeter_additional_files_folder}}/lib/ext/"
+            dest: "{{jmeter_install_dir}}/{{jmeter_distribution}}/lib/ext"
+            remote_src: yes
+            mode: u=rwx,g=rwx
+
+
+    #        use jmeterHome.txt inside benchmark for now
+#        - name: Create JMETER_HOME
+#          become: yes
+#          ansible.builtin.copy:
+#            dest: "/etc/profile.d/jmeter.sh"
+#            content: |
+#              JMETER_HOME="{{jmeter_install_dir}}/{{jmeter_distribution}}"
+
+#    - name: create Maven install directory
+#      ansible.builtin.file:
+#        path: "{{install_dir}}/maven"
+#        state: directory
+#        mode: '0777'
+#    - name: Download maven version 3.8.2
+#      ansible.builtin.get_url:
+#        url: https://archive.apache.org/dist/maven/maven-3/3.8.2/binaries/apache-maven-3.8.2-bin.tar.gz
+#        dest: "{{install_dir}}/maven/apache-maven-3.8.2-bin.tar.gz"
+#        mode: '0777'
+#    - name: unarchive Maven
+#      ansible.builtin.unarchive:
+#        src: "{{install_dir}}/maven/apache-maven-3.8.2-bin.tar.gz"
+#        dest: "{{install_dir}}/maven"
+#        remote_src: yes
+#        mode: '0777'
+
+    - name: Git install
+      become: yes
+      ansible.builtin.yum:
+        name: git
+        state: present
+
+
+- name: setup app env
+  hosts: "{{ app }}"
+  tasks:
+
+    - name: Git install
+      become: yes
+      ansible.builtin.yum:
+        name: git
+        state: present
+
+# todo : check mvn install and add the symbolic link to mvn
+# todo: install java
+# todo for app host: disable firewall, do docker install

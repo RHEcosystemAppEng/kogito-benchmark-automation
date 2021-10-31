@@ -3,21 +3,35 @@ localhost ansible_connection=local
 
 [LOCAL:vars]
 install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install
-permissions_owner=uegozi
-permissions_group=uegozi
+jmeter_install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install/jmeter
+maven_install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install/maven
 
 [VM1]
 appeng-vm01.cloud.lab.eng.bos.redhat.com
 
 [VM1:vars]
-install_dir=/opt/fsi-kogito
-permissions_owner=uegozi
-permissions_group=fsi-team
+install_dir=/opt/fsi-kogito/prod
+jmeter_install_dir=/opt/fsi-kogito/prod/jmeter
+maven_install_dir=/opt/fsi-kogito/prod/maven
 
 [VM2]
 appeng-vm02.cloud.lab.eng.bos.redhat.com
 
 [VM2:vars]
-install_dir=/opt/fsi-kogito
-permissions_owner=uegozi
-permissions_group=fsi-team
+install_dir=/opt/fsi-kogito/prod
+maven_install_dir=/opt/fsi-kogito/prod/maven
+
+[all:vars]
+jmeter_distribution=apache-jmeter-5.4.1
+jmeter_distribution_url=https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.4.1.tgz
+jmeter_additional_files_archive=apache-jmeter-5.4.1_additional.tar.gz
+jmeter_additional_files_folder=apache-jmeter-5.4.1_additional
+
+
+[LOCAL_TEMP]
+localhost ansible_connection=local
+
+[LOCAL_TEMP:vars]
+install_dir=/home/uegozi/temp
+jmeter_install_dir=/home/uegozi/temp/jmeter
+maven_install_dir=/home/uegozi/temp/maven
