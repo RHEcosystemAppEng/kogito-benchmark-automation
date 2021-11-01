@@ -42,8 +42,8 @@
   block:
     - name: run mongo db checks AFTER test run
       ansible.builtin.shell: ./mongo.sh after "{{ containerType }}"
-        args:
-          chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker/mongo"
+      args:
+        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker/mongo"
       register: mongo_db_out
 
     - name: mongo_db_out is
