@@ -1,49 +1,17 @@
 ---
-- name: install and/or build and run application and infra
-  hosts: "{{ app }}"
+- name: install tester environment
+  hosts: "{{ tester }}"
+  any_errors_fatal: true
   vars:
     test_defs: "{{ lookup('file',''+testdefs+'') | from_json }}"
     ansible_python_interpreter: /usr/bin/python3
   tasks:
 
-####################### MONGO INFRA
-
-    - name: is mongo requested for persistence?
-      ansible.builtin.debug:
-        msg:
-          - "Mongo Infra requested:{{ test_defs.AppInfra.Mongo }}"
-
-    - name: Set a app_profile variable
-      ansible.builtin.set_fact:
-        app_profile: mongo
-      when: test_defs.AppInfra.Mongo == "yes"
-
-    - name: Include the mongo containers setup role
-      include_role:
-        name: mongo-container-{{ test_defs.InfraSetup.container }}
-
-####################### POSTGRES INFRA
-
-    - name: is postgres requested for persistence?
-      ansible.builtin.debug:
-        msg:
-          - "PostgresQL Infra requested:{{ test_defs.AppInfra.PostgresQL }}"
-
-    - name: Set a app_profile variable
-      ansible.builtin.set_fact:
-        app_profile: postgres
-      when: test_defs.AppInfra.PostgresQL == "yes"
-
-    - name: Include the postgres containers setup role
-      include_role:
-        name: postgres-container-{{ test_defs.InfraSetup.container }}
-
-######################### APPLICATION
-
-    - name: trying to stop business process app - might not be running
-      ansible.builtin.shell: ./stopTheApp.sh
-      args:
-        chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
+    - name: create install directory
+      ansible.builtin.file:
+        path: "{{install_dir}}"
+        state: directory
+        mode: u=rwx,g=rwx
 
     - name: setup benchmark project - once per batch run
       block:
@@ -64,17 +32,117 @@
             src: "test-resources/batch.json"
             dest: "{{install_dir}}/kogito-benchmark/test/test-run/"
 
-        - name: set JMeter Home directory to "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
+        - name: set JMeter Home directory to "{{jmeter_install_dir}}/{{jmeter_distribution}}"
           ansible.builtin.copy:
             dest: "{{install_dir}}/kogito-benchmark/test-clients/jmeter-client/jmeterHome.txt"
-            content: "{{install_dir}}/jmeter/apache-jmeter-5.4.1"
+            content: "{{jmeter_install_dir}}/{{jmeter_distribution}}"
       when: testidx == '0'
+
+- name: install app environment
+  hosts: "{{ app }}"
+  any_errors_fatal: true
+  vars:
+    test_defs: "{{ lookup('file',''+testdefs+'') | from_json }}"
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+
+    - name: create install directory
+      ansible.builtin.file:
+        path: "{{install_dir}}"
+        state: directory
+        mode: u=rwx,g=rwx
+
+####################### MONGO INFRA
+
+    - name: is mongo requested for persistence?
+      ansible.builtin.debug:
+        msg:
+          - "Mongo Infra requested:{{ test_defs.AppInfra.Mongo }}"
+
+    - name: Set app_profile variable
+      ansible.builtin.set_fact:
+        app_profile: mongo
+      when: test_defs.AppInfra.Mongo == "yes"
+
+    - name: Include the mongo containers setup role
+      include_role:
+        name: mongo-container-{{ test_defs.InfraSetup.container }}
+      vars:
+        reqRoleAction: 'setup'
+
+####################### POSTGRES INFRA
+
+    - name: is postgres requested for persistence?
+      ansible.builtin.debug:
+        msg:
+          - "PostgresQL Infra requested:{{ test_defs.AppInfra.PostgresQL }}"
+
+    - name: Set app_profile variable
+      ansible.builtin.set_fact:
+        app_profile: postgres
+      when: test_defs.AppInfra.PostgresQL == "yes"
+
+    - name: Include the postgres containers setup role
+      include_role:
+        name: postgres-container-{{ test_defs.InfraSetup.container }}
+      vars:
+        reqRoleAction: 'setup'
+
+######################### APPLICATION
+
+    - name: stop any running business process app (either from this project or another project on the machine)
+      block:
+        - name: Gather facts on listening ports
+          community.general.listen_ports_facts:
+        - name: find pid for business process app port
+          set_fact:
+            app_pid: "{{ ansible_facts.tcp_listen | selectattr('port', 'equalto', test_defs.Process.port) | map(attribute='pid') | join(',') }}"
+        - name: kill process if exists
+          ansible.builtin.shell:
+            cmd: kill -9 "{{ app_pid }}"
+          when: app_pid | length > 0
+
+    - name: setup benchmark project - once per batch run
+      block:
+        - name: remove any previous existing benchmark
+          ansible.builtin.file:
+            path: "{{install_dir}}/kogito-benchmark"
+            state: absent
+
+        - name: checkout the app version "{{ test_defs.InfraSetup.appVersion }}"
+          ansible.builtin.git:
+            repo: https://github.com/RHEcosystemAppEng/kogito-benchmark.git
+            dest: "{{install_dir}}/kogito-benchmark"
+            #        single_branch: yes
+            version: "{{ test_defs.InfraSetup.appVersion }}"
+      when: testidx == '0' and tester != app
 
     - name: build and run business process app
       ansible.builtin.shell: ./runAppInTheBackground.sh "{{ app_profile }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/"
 
-# run Lokeshs validations on env
+######################### VALIDATE
 
+    - name: wait a bit more or else next check might fail
+      ansible.builtin.pause:
+        seconds: 10
 
+    - name: Test if the process-quarkus-example is up
+      uri:
+        url: "{{ test_defs.Process.schema }}://{{ test_defs.Process.url }}:{{ test_defs.Process.port }}/greeting"
+        method: GET
+        headers:
+          Content-Type: "application/json"
+        status_code: 200, 201
+
+    - name: checks on mongo before tests are run
+      include_role:
+        name: mongo-container-direct
+      vars:
+        reqRoleAction: 'pre-test'
+        containerType: "{{ test_defs.InfraSetup.container }}"
+      when: test_defs.AppInfra.Mongo == "yes"
+
+    - name: send indicator to shell script that we finished the whole playbook
+      ansible.builtin.shell: echo "SUCCEEDED PREPARE" > playbookStatus.txt

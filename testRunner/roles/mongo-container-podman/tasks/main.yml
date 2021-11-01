@@ -6,21 +6,12 @@
     state: absent
     ports:
       - "27017:27017"
-  register: mongo_out
-#  when: test_defs.AppInfra.Mongo == "no"
 
-- name: Start a mongo container if not running already
+- name: Start a mongo container
   containers.podman.podman_container:
     name: kogito-mongodb
     image: quay.io/dmartino/mongo:4.4.9
     state: started
     ports:
       - "27017:27017"
-  register: mongo_out
-  when: test_defs.AppInfra.Mongo == "yes"
-
-#    - name: mongo debug
-#      ansible.builtin.debug:
-#        msg:
-#          - "{{ mongo_out }}"
-
+  when: test_defs.AppInfra.Mongo == "yes" and reqRoleAction == "setup"

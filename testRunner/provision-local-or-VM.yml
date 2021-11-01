@@ -28,7 +28,7 @@
 
         - name: unarchive additional used plugins to JMeter installation from benchmark automation
           ansible.builtin.unarchive:
-            src: "envSetup/install-resources/{{jmeter_additional_files_archive}}"
+            src: "install-resources/{{jmeter_additional_files_archive}}"
             dest: "{{jmeter_install_dir}}"
             mode: u=rwx,g=rwx
         - name: copy additional used plugins into JMeter unzipped location "{{jmeter_install_dir}}/{{jmeter_distribution}}" (copies only first level because of / at end of src folder - if no / then copies also the original folder name itself which is also not wanted)
@@ -89,4 +89,6 @@
 
 # todo : check mvn install and add the symbolic link to mvn
 # todo: install java
+# install python3 with including:
+#- sudo yum install -y libselinux-python3
 # todo for app host: disable firewall, do docker install

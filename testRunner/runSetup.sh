@@ -1,6 +1,6 @@
 #!/bin/sh
 
-BATCH_FILE=../test-resources/batch.json
+BATCH_FILE=test-resources/batch.json
 
 TESTER=$(jq -r '.InfraSetup.tester.name' $BATCH_FILE)
 APP=$(jq -r '.InfraSetup.app.name' $BATCH_FILE)

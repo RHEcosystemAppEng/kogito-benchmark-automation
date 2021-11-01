@@ -26,12 +26,3 @@ jmeter_distribution=apache-jmeter-5.4.1
 jmeter_distribution_url=https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.4.1.tgz
 jmeter_additional_files_archive=apache-jmeter-5.4.1_additional.tar.gz
 jmeter_additional_files_folder=apache-jmeter-5.4.1_additional
-
-
-[LOCAL_TEMP]
-localhost ansible_connection=local
-
-[LOCAL_TEMP:vars]
-install_dir=/home/uegozi/temp
-jmeter_install_dir=/home/uegozi/temp/jmeter
-maven_install_dir=/home/uegozi/temp/maven

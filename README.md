@@ -5,17 +5,26 @@ Contains all automation tools required to perform a Kogito benchmark test
 ### Install Ansible on controller machine
 ```
 sudo yum update
-# on RHEL8 enable repo
+```
+on RHEL8 enable repo
+```
 sudo subscription-manager repos --enable ansible-2.9-for-rhel-8-x86_64-rpms
-# on RHEL7 enable repo
+```
+on RHEL7 enable repo
+```
  sudo subscription-manager repos --enable rhel-7-server-ansible-2.9-rpms
-# install ansible
-sudo yum install ansible 
-# install extra ansible modules
+```
+install ansible
+```
+sudo yum install ansible
+``` 
+install extra ansible modules
+```
 ansible-galaxy collection install community.docker
 ansible-galaxy collection install containers.podman
 ansible-galaxy collection install community.general
 ```
+
 ### Install JQ on controller and tester machine
 JQ is used in most of the runXXX.sh scripts to parse the batch.json configuration file 
 ```
@@ -26,26 +35,32 @@ sudo yum install  jq
 
 ### Install Ansible playbook dependencies on host machines
 ```
-# in case python 3 is not installed - if 'python' is pointing to different version then don't forget to set
-# ansible_python_interpreter: <python3 install dir> e.g. /usr/bin/python3
-# python3 is needed by 'docker sdk for python'
 sudo yum install python3
+sudo yum install -y libselinux-python3
+```
+In case python 3 is not linked don't forget to set ansible_python_interpreter: <python3 install dir> e.g. /usr/bin/python3. 
+python3 is needed by 'docker sdk for python'
 
-# install pip to install 'docker sdk for python' which is needed for certain docker modules
+install pip to install 'docker sdk for python' which is needed for certain docker modules
+```
 sudo subscription-manager repos --enable rhel-server-rhscl-7-rpms
 --> Repository 'rhel-server-rhscl-7-rpms' is enabled for this system.
 sudo yum install python27-python-pip
 --> ...  Complete!
-
-# once shell is closed need to run enable command again to be able to use pip
+```
+once shell is closed need to run enable command again to be able to use pip
+```
 sudo scl enable python27 bash
-# check that installed and usable
+```
+check that installed and usable
+```
 which pip
 --> /opt/rh/python27/root/usr/bin/pip
 pip -V
 --> pip 8.1.2 from /opt/rh/python27/root/usr/lib/python2.7/site-packages (python 2.7)
-
-# install docker sdk for python
+```
+install docker sdk for python
+```
 pip install docker
 ```
 
@@ -57,7 +72,7 @@ under his/her account on VM1 (`~/.ssh`) to both VM1 and VM2 (`~/.ssh/authorized_
 ## Running tests
 - update the inventory file `testRunner/env/inventory`
 - if environments are already provisioned, skip ahead; 
-  otherwise run script `envSetup/runSetup.sh` (not final)
+  otherwise run script `runSetup.sh` (not final)
 - configure tests
   - edit file `testRunner/test-resources/batch.json`   
     - `InfraSetup.appVersion`: benchmark project branch under test

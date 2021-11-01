@@ -1,5 +1,20 @@
 ---
-- name: run post test - tester machine operations
+- name: on app - confirm environment
+  hosts: "{{ app }}"
+  vars:
+    test_defs: "{{ lookup('file',''+testdefs+'') | from_json }}"
+    ansible_python_interpreter: /usr/bin/python3
+  tasks:
+
+    - name: checks on mongo after tests are run
+      include_role:
+        name: mongo-container-direct
+      vars:
+        reqRoleAction: 'post-test'
+        containerType: "{{ test_defs.InfraSetup.container }}"
+      when: test_defs.AppInfra.Mongo == "yes"
+
+- name: from tester - get data for report generation
   hosts: "{{ tester }}"
   tasks:
 

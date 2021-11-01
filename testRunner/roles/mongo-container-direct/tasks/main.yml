@@ -1,0 +1,51 @@
+---
+- name: vars
+  ansible.builtin.debug:
+    msg: "vars are - isMongo#{{ test_defs.AppInfra.Mongo }}, container#{{ reqRoleAction }}, containerType#{{ containerType }}"
+
+- name: actions on mongo BEFORE test run
+  block:
+    - name: run mongo db checks BEFORE test run
+      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh before podman
+      register: mongo_db_out
+    - name: mongo_db_out is
+      ansible.builtin.debug:
+        msg: "mongo_db_out is {{ mongo_db_out.stdout }}"
+    - name: filter db kogito_quarkus
+      ansible.builtin.shell:
+        cmd: echo "{{mongo_db_out.stdout}}" | tr -d ' ' | grep 'kogito_quarkus0.000GB'
+      register: grep_content
+      ignore_errors: true  # or else an error is thrown if grep string is not found
+    - name: check that db kogito_quarkus is there and empty (application did create it before)
+      ansible.builtin.debug:
+        msg: "grep_content is {{ grep_content.stdout }}"
+      failed_when: grep_content.stdout == ''
+    - name: find db index index_process_instance_id
+      ansible.builtin.shell:
+        cmd: echo "{{mongo_db_out.stdout}}" | tr -d '\t\r\n ' | grep 'name:index_process_instance_id'
+      register: grep_content
+      ignore_errors: true  # or else an error is thrown if grep string is not found
+    - name: check that db index index_process_instance_id is there (application did create it before)
+      ansible.builtin.debug:
+        msg: "grep_content is {{ grep_content.stdout }}"
+      failed_when: grep_content.stdout == ''
+  when: test_defs.AppInfra.Mongo == "yes" and reqRoleAction == "pre-test"
+
+- name: actions on mongo AFTER test run
+  block:
+    - name: run mongo db checks AFTER test run
+      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh after podman
+      register: mongo_db_out
+    - name: mongo_db_out is
+      ansible.builtin.debug:
+        msg: "mongo_db_out is {{ mongo_db_out.stdout }}"
+    - name: filter db kogito_quarkus for 0 values in table simpleHT
+      ansible.builtin.shell:
+        cmd: echo "{{mongo_db_out.stdout}}" | tr -d '\t\r\n ' | grep 'switchedtodbkogito_quarkus0bye'
+      register: grep_content
+      ignore_errors: true  # or else an error is thrown if grep string is not found
+    - name: above grep expected to be empty - if filter is found then something is wrong - no records entered the db during the test
+      ansible.builtin.debug:
+        msg: "grep_content is {{ grep_content.stdout }}"
+      failed_when: grep_content.stdout != ''
+  when: test_defs.AppInfra.Mongo == "yes" and reqRoleAction == "post-test"
