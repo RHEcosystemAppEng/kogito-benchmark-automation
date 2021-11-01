@@ -6,6 +6,7 @@
 - name: actions on mongo BEFORE test run
   block:
     - name: run mongo db checks BEFORE test run
+      become:  "{{ 'yes' if containerType == 'docker' else 'no' }}"
       ansible.builtin.shell: ./mongo.sh before "{{ containerType }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker/mongo"
@@ -41,6 +42,7 @@
 - name: actions on mongo AFTER test run
   block:
     - name: run mongo db checks AFTER test run
+      become:  "{{ 'yes' if containerType == 'docker' else 'no' }}"
       ansible.builtin.shell: ./mongo.sh after "{{ containerType }}"
       args:
         chdir: "{{install_dir}}/kogito-benchmark/test-apps/process-quarkus-example/docker/mongo"
