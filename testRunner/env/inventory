@@ -19,6 +19,7 @@ appeng-vm02.cloud.lab.eng.bos.redhat.com
 
 [VM2:vars]
 install_dir=/opt/fsi-kogito/prod
+jmeter_install_dir=/opt/fsi-kogito/prod/jmeter
 maven_install_dir=/opt/fsi-kogito/prod/maven
 
 [all:vars]
