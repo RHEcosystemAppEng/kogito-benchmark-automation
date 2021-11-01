@@ -6,7 +6,7 @@
 - name: actions on mongo BEFORE test run
   block:
     - name: run mongo db checks BEFORE test run
-      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh before podman
+      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh before "{{ containerType }}"
       register: mongo_db_out
     - name: mongo_db_out is
       ansible.builtin.debug:
@@ -34,7 +34,7 @@
 - name: actions on mongo AFTER test run
   block:
     - name: run mongo db checks AFTER test run
-      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh after podman
+      ansible.builtin.shell: ./roles/mongo-additional/mongo.sh after "{{ containerType }}"
       register: mongo_db_out
     - name: mongo_db_out is
       ansible.builtin.debug:
