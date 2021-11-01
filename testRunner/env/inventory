@@ -2,9 +2,9 @@
 localhost ansible_connection=local
 
 [LOCAL:vars]
-install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install
-jmeter_install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install/jmeter
-maven_install_dir=/home/uegozi/.ansible/playbooks/benchmark-on-premise/local-install/maven
+install_dir=/home/uegozi/tmp
+jmeter_install_dir=/home/uegozi/tmp/jmeter
+maven_install_dir=/home/uegozi/tmp/maven
 
 [VM1]
 appeng-vm01.cloud.lab.eng.bos.redhat.com
