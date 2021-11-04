@@ -52,7 +52,36 @@
         state: directory
         mode: u=rwx,g=rwx
 
-####################### MONGO INFRA
+    ######################### APPLICATION PART 1
+
+    - name: stop any running business process app (either from this project or another project on the machine)
+      block:
+        - name: Gather facts on listening ports
+          community.general.listen_ports_facts:
+        - name: find pid for business process app port
+          set_fact:
+            app_pid: "{{ ansible_facts.tcp_listen | selectattr('port', 'equalto', test_defs.Process.port) | map(attribute='pid') | join(',') }}"
+        - name: kill process if exists
+          ansible.builtin.shell:
+            cmd: kill -9 "{{ app_pid }}"
+          when: app_pid | length > 0
+
+    - name: setup benchmark project - once per batch run
+      block:
+        - name: remove any previous existing benchmark
+          ansible.builtin.file:
+            path: "{{install_dir}}/kogito-benchmark"
+            state: absent
+
+        - name: checkout the app version "{{ test_defs.InfraSetup.appVersion }}"
+          ansible.builtin.git:
+            repo: https://github.com/RHEcosystemAppEng/kogito-benchmark.git
+            dest: "{{install_dir}}/kogito-benchmark"
+            #        single_branch: yes
+            version: "{{ test_defs.InfraSetup.appVersion }}"
+      when: testidx == '0' and tester != app
+
+    ####################### MONGO INFRA
 
     - name: is mongo requested for persistence?
       ansible.builtin.debug:
@@ -88,34 +117,7 @@
       vars:
         reqRoleAction: 'setup'
 
-######################### APPLICATION
-
-    - name: stop any running business process app (either from this project or another project on the machine)
-      block:
-        - name: Gather facts on listening ports
-          community.general.listen_ports_facts:
-        - name: find pid for business process app port
-          set_fact:
-            app_pid: "{{ ansible_facts.tcp_listen | selectattr('port', 'equalto', test_defs.Process.port) | map(attribute='pid') | join(',') }}"
-        - name: kill process if exists
-          ansible.builtin.shell:
-            cmd: kill -9 "{{ app_pid }}"
-          when: app_pid | length > 0
-
-    - name: setup benchmark project - once per batch run
-      block:
-        - name: remove any previous existing benchmark
-          ansible.builtin.file:
-            path: "{{install_dir}}/kogito-benchmark"
-            state: absent
-
-        - name: checkout the app version "{{ test_defs.InfraSetup.appVersion }}"
-          ansible.builtin.git:
-            repo: https://github.com/RHEcosystemAppEng/kogito-benchmark.git
-            dest: "{{install_dir}}/kogito-benchmark"
-            #        single_branch: yes
-            version: "{{ test_defs.InfraSetup.appVersion }}"
-      when: testidx == '0' and tester != app
+######################### APPLICATION PART 2
 
     - name: build and run business process app
       ansible.builtin.shell: ./runAppInTheBackground.sh "{{ app_profile }}"

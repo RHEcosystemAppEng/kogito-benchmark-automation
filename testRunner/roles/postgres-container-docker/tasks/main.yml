@@ -9,7 +9,7 @@
       - "5432:5432"
   register: postgresql_out
 
-- name: Create postgresql container and init with the initial kogito setup required for pstgres (db and roles, app will create tables on startup)
+- name: Create postgresql container and init with the initial kogito setup required for postgres (db and roles, app will create tables on startup)
   block:
   - name: Start a postgresql container if not running already
     become: yes
