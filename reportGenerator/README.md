@@ -18,10 +18,14 @@ pip3 install -r requirements.txt
 Requirements:
 * Generated CSV is named `rawdata.csv` and has the same content as in the given template [rawdata.csv](./rawdata.csv)
 * Execution properties are located in a file named `execution.properties` and has the same content as in the given template [execution.properties](./execution.properties)
+* for a report based on multiple batch runs, copy all batches into the `reportGenerator` folder with folder names `test-run1`, `test-run2`, etc.
+use report benchmarkReportMultipleBatches.ipynb as example and adapt to desired comparison
 
 This command creates the HTML report starting from the above requirements:
 ```shell
 python3 -m jupyter nbconvert --execute benchmarkReport.ipynb --to html --no-input
+
+python3 -m jupyter nbconvert --execute benchmarkReportMultipleBatches.ipynb --to html --no-input
 ```
 
 Use `open benchmarkReport.html` to show the generated report on the default browser.
