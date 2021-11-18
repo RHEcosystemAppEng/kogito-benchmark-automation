@@ -104,12 +104,17 @@
     - name: is postgres requested for persistence?
       ansible.builtin.debug:
         msg:
-          - "PostgresQL Infra requested:{{ test_defs.AppInfra.PostgresQL }}"
+          - "PostgresQL Infra requested:{{ test_defs.AppInfra.PostgresQL }}, reactive: {{ test_defs.AppInfra.PostgresQLReactive }}, jdbc: {{ test_defs.AppInfra.PostgresQLJdbc }}"
 
     - name: Set app_profile variable
       ansible.builtin.set_fact:
         app_profile: postgres
-      when: test_defs.AppInfra.PostgresQL == "yes"
+      when: test_defs.AppInfra.PostgresQL == "yes" and test_defs.AppInfra.PostgresQLReactive == "yes"
+
+    - name: Set app_profile variable
+      ansible.builtin.set_fact:
+        app_profile: jdbc
+      when: test_defs.AppInfra.PostgresQL == "yes" and test_defs.AppInfra.PostgresQLJdbc == "yes"
 
     - name: Include the postgres containers setup role
       include_role:

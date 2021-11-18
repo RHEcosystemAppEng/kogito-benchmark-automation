@@ -1,12 +1,17 @@
 {
   "InfraSetup": {
     "appVersion":"CoreFix-mem-idx-2.0.0-snap",
-    "tester": {"name":"LOCAL","hostname": "localhost"},
-    "app": {"name":"LOCAL","hostname": "localhost"},
-    "container":"podman"
+    "tester": {"name":"VM1", "hostname": "appeng-vm01.cloud.lab.eng.bos.redhat.com"},
+    "app": {"name":"VM2", "hostname": "appeng-vm02.cloud.lab.eng.bos.redhat.com"},
+    "container":"docker"
   },
-  "AppInfra": {"Mongo":"yes", "PostgresQL":"no", "DataIndex":"no", "Kafka":"no"},
-  "Process": {"schema":"http", "url":"localhost", "port":8080, "app":"simpleHT"},
+  "AppInfra": {"Mongo":"no", "PostgresQL":"yes", "PostgresQLReactive":"no", "PostgresQLJdbc":"yes", "DataIndex":"no", "Kafka":"no"},
+  "Process": {"schema":"http", "url":"appeng-vm02.cloud.lab.eng.bos.redhat.com", "port":8080, "app":"simpleHT"},
+  "ProcessProperties": [
+    {"key":"quarkus.vertx.worker-pool-size", "val":100},
+    {"key":"quarkus.datasource.jdbc.max-size", "val":100}
+  ],
+  "Comments": ["with fix"],
   "Warmup": {
     "enabled":"yes",
     "type":"duration",
@@ -20,7 +25,9 @@
     "runs": [
       {"replicas":1, "users":1},
       {"replicas":1, "users":4},
-      {"replicas":1, "users":8}
+      {"replicas":1, "users":8},
+      {"replicas":1, "users":60},
+      {"replicas":1, "users":100}
     ]
   }
 }

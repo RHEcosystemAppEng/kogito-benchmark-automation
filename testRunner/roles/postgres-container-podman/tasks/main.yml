@@ -1,8 +1,8 @@
 ---
-- name: Create the postgres network
-  containers.podman.podman_network:
-    name: postgres-compose-network
-    driver: bridge
+#- name: Create the postgres network
+#  containers.podman.podman_network:
+#    name: postgres-compose-network
+#    driver: bridge
 
 - name: remove postgresql container if present
   containers.podman.podman_container:
@@ -12,27 +12,15 @@
     ports:
       - "5432:5432"
   register: postgresql_out
-#  when: test_defs.AppInfra.PostgresQL == "no"
 
-- name: remove pgadmin container if present
-  containers.podman.podman_container:
-    name: pgadmin-container
-    image: quay.io/dmartino/pgadmin4:5.0
-    state: absent
-    ports:
-      - "8055:80"
-  register: postgresql_out_pgadmin
-#  when: test_defs.AppInfra.PostgresQL == "no"
-
-#    - name: remove pgadmin container if present
-#      containers.podman.podman_container:
-#        name: pgadmin-container
-#        image: registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi8-13.4-4.7.3
-#        state: absent
-#        ports:
-#          - "8055:80"
-#      register: postgresql_out_pgadmin
-#      when: test_defs.AppInfra.PostgresQL == "no"
+#- name: remove pgadmin container if present
+#  containers.podman.podman_container:
+#    name: pgadmin-container
+#    image: quay.io/dmartino/pgadmin4:5.0
+#    state: absent
+#    ports:
+#      - "8055:80"
+#  register: postgresql_out_pgadmin
 
 - name: Start a postgresql container if not running already
   containers.podman.podman_container:
@@ -43,46 +31,24 @@
       POSTGRESQL_ADMIN_PASSWORD: pass
     ports:
       - "5432:5432"
-    #        volumes:
-    #          - ./test-infra/sql:/docker-entrypoint-initdb.d/
+    volumes:
+      - ./roles/postgres-container-podman/sql:/postgresql-init/
     network:
       - postgres-compose-network
   register: postgresql_out
   when: test_defs.AppInfra.PostgresQL == "yes"
 
-- name: Start a pgadmin container if not running already
-  containers.podman.podman_container:
-    name: pgadmin-container
-    image: quay.io/dmartino/pgadmin4:5.0
-    state: started
-    env:
-      PGADMIN_DEFAULT_EMAIL: user@user.org
-      PGADMIN_DEFAULT_PASSWORD: pass
-    ports:
-      - "8055:80"
-    network:
-      - postgres-compose-network
-  register: postgresql_out_pgadmin
-  when: test_defs.AppInfra.PostgresQL == "yes"
-
-#    - name: Start a pgadmin container if not running already
-#      containers.podman.podman_container:
-#        name: pgadmin-container
-#        image: registry.connect.redhat.com/crunchydata/crunchy-pgadmin4:ubi8-13.4-4.7.3
-#        state: started
-#        env:
-#          PGADMIN_SETUP_EMAIL: user@user.org
-#          PGADMIN_SETUP_PASSWORD: pass
-#        ports:
-#          - "8055:80"
-#        network:
-#          - postgres-compose-network
-#      register: postgresql_out_pgadmin
-#      when: test_defs.AppInfra.PostgresQL == "yes"
-
-#    - name: postgresql debug
-#      ansible.builtin.debug:
-#        msg:
-#          - "postgresql_out: {{ postgresql_out }}"
-#          - "postgresql_out_pgadmin: {{ postgresql_out_pgadmin }}"
-
+#- name: Start a pgadmin container if not running already
+#  containers.podman.podman_container:
+#    name: pgadmin-container
+#    image: quay.io/dmartino/pgadmin4:5.0
+#    state: started
+#    env:
+#      PGADMIN_DEFAULT_EMAIL: user@user.org
+#      PGADMIN_DEFAULT_PASSWORD: pass
+#    ports:
+#      - "8055:80"
+#    network:
+#      - postgres-compose-network
+#  register: postgresql_out_pgadmin
+#  when: test_defs.AppInfra.PostgresQL == "yes"

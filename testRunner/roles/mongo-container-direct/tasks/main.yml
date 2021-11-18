@@ -37,7 +37,7 @@
       ansible.builtin.debug:
         msg: "grep_content is {{ grep_content.stdout }}"
       failed_when: grep_content.stdout == ''
-  when: test_defs.AppInfra.Mongo == "yes" and reqRoleAction == "pre-test"
+  when: test_defs.AppInfra.Mongo == "yes" and reqRoleAction == "pre-test" and test_defs.InfraSetup.appVersion != "main"
 
 - name: actions on mongo AFTER test run
   block:

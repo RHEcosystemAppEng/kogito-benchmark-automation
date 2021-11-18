@@ -79,7 +79,7 @@ under his/her account on VM1 (`~/.ssh`) to both VM1 and VM2 (`~/.ssh/authorized_
     - `InfraSetup.tester`: `name`: LOCAL|VM1|VM2 `hostname`: localhost|<host name>
     - `InfraSetup.app`: `name`: LOCAL|VM2 `hostname`: localhost|<host name>`
     - `InfraSetup.container`: podman|docker
-    - `AppInfra`: lists all supported infra structure components (TODO: currently just Mongo and Postgres) - to use, set value to yes, otherwise to no
+    - `AppInfra`: lists all supported infra structure components (Mongo, Postgres Reactive, Postgres JDBC) - to use, set value to yes, otherwise to no
     - `Process`: endpoint configuration under test
     - `Warmup.enabled`: if case a warmup run is done before the test runs
     - `Warmup.type`: see `Tests.type`
